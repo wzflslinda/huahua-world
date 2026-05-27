@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>手猫AI导购引擎V2 · 运动户外前台Demo</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f2f2f2; }
+
+  /* Phone Frame */
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #fff;
+    border-radius: 44px;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+    position: relative;
+    margin: 20px auto;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 126px;
+    height: 34px;
+    background: #000;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    z-index: 1000;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    height: 48px;
+    background: #fff;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 28px 6px 28px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #000;
+    position: relative;
+    z-index: 900;
+  }
+
+  /* Search Header */
+  .search-header {
+    background: #fff;
+    padding: 4px 12px 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-box {
+    flex: 1;
+    height: 34px;
+    background: #f5f5f5;
+    border-radius: 17px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 6px;
+  }
+
+  /* Scroll Area */
+  .scroll-area {
+    height: calc(100% - 48px - 46px - 64px);
+    overflow-y: auto;
+    background: #f5f5f5;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* AI Guide Header */
+  .ai-header {
+    background: #fff;
+    padding: 12px 12px 8px 12px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .ai-header-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .ai-avatar-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF5000, #FF9000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+  .ai-title-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ai-badge {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FF5000, #FF9000);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .ai-content-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  .ai-content-text .highlight {
+    color: #FF5000;
+    font-weight: 600;
+  }
+  .ai-content-text .key-point {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: #fff5f0;
+    color: #FF5000;
+    padding: 0 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 2px;
+  }
+
+  /* Brand Pills */
+  .brand-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .brand-pills::-webkit-scrollbar { display: none; }
+  .brand-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 58px;
+    cursor: pointer;
+  }
+  .brand-pill-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #f8f8f8;
+    object-fit: cover;
+    border: 1px solid #f0f0f0;
+  }
+  .brand-pill-name {
+    font-size: 11px;
+    color: #666;
+    white-space: nowrap;
+  }
+
+  /* AI Action Bar */
+  .ai-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 6px;
+    border-top: 0.5px solid #f5f5f5;
+  }
+  .ai-action-left {
+    display: flex;
+    gap: 8px;
+  }
+  .ai-chip {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    border: 0.5px solid #e0e0e0;
+    background: #fafafa;
+    color: #666;
+    cursor: pointer;
+  }
+  .ai-chip.active {
+    background: #fff5f0;
+    border-color: #FF5000;
+    color: #FF5000;
+    font-weight: 600;
+  }
+  .ai-go-btn {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 13px;
+    color: #999;
+    cursor: pointer;
+  }
+
+  /* Filter Tabs */
+  .filter-tabs {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    padding: 0 12px;
+    height: 40px;
+    gap: 16px;
+    border-bottom: 0.5px solid #f0f0f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .filter-tab {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+  }
+  .filter-tab.active {
+    color: #FF0036;
+    font-weight: 600;
+  }
+  .filter-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 2.5px;
+    background: #FF0036;
+    border-radius: 2px;
+  }
+  .filter-tab.ai-tab {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: linear-gradient(135deg, #FF5000, #FF9000);
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Promo Banner */
+  .promo-banner {
+    margin: 8px 12px;
+    background: linear-gradient(90deg, #fff0f2, #fff5f0);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .promo-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .promo-tag {
+    background: #FF0036;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .promo-text {
+    font-size: 12px;
+    color: #333;
+    font-weight: 500;
+  }
+  .promo-time {
+    font-size: 11px;
+    color: #FF0036;
+  }
+
+  /* Product Grid */
+  .product-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 0 6px 80px 6px;
+  }
+  .product-card {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .product-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #f8f8f8;
+  }
+  .product-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .product-tag-618 {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: linear-gradient(135deg, #FF0036, #FF6B6B);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  .product-info {
+    padding: 8px;
+  }
+  .price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  .price-symbol { font-size: 11px; color: #FF0036; font-weight: 600; }
+  .price-num { font-size: 18px; color: #FF0036; font-weight: 700; }
+  .price-original { font-size: 11px; color: #999; text-decoration: line-through; margin-left: 4px; }
+  .product-title {
+    font-size: 12px;
+    color: #333;
+    line-height: 1.45;
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-weight: 500;
+  }
+  .product-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #999;
+  }
+  .product-sold {
+    color: #999;
+  }
+  .product-shop {
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .product-tags-row {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+  }
+  .ptag {
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+  }
+  .ptag-red { background: #fff0f2; color: #FF0036; }
+  .ptag-orange { background: #fff5e6; color: #FF6A00; }
+  .ptag-green { background: #f0f9f0; color: #52c41a; }
+  .ptag-gray { background: #f5f5f5; color: #999; }
+
+  /* Inline AI Bubble */
+  .ai-inline {
+    grid-column: 1 / -1;
+    background: #fff;
+    border-radius: 14px;
+    margin: 2px 0;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+  }
+  .ai-inline-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF5000, #FF9000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .ai-inline-body {
+    flex: 1;
+  }
+  .ai-inline-text {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: #333;
+  }
+  .ai-inline-text strong {
+    color: #FF5000;
+    font-weight: 600;
+  }
+  .ai-inline-options {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .ai-inline-btn {
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    border: 0.5px solid #ffd4b8;
+    background: #fff8f3;
+    color: #FF5000;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .ai-inline-btn:active { opacity: 0.7; }
+  .ai-inline-btn.selected {
+    background: #FF5000;
+    color: #fff;
+    border-color: #FF5000;
+  }
+
+  /* Intent Label Badge */
+  .intent-label {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .intent-a { background: #fff0e6; color: #ff7a00; }
+  .intent-b { background: #e6f0ff; color: #0066ff; }
+  .intent-c { background: #e6f7e6; color: #389e0d; }
+  .intent-d { background: #fff0f0; color: #cf1322; }
+  .intent-e { background: #fffbe6; color: #d48806; }
+
+  /* Bottom Tab Bar */
+  .tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid #f0f0f0;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    padding-top: 6px;
+    z-index: 1000;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .tab-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .tab-label {
+    font-size: 10px;
+    color: #999;
+  }
+  .tab-item.active .tab-label { color: #FF5000; }
+
+  /* Control Panel */
+  .control-panel {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    padding: 16px;
+    z-index: 10000;
+    width: 220px;
+  }
+  .cp-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cp-section {
+    margin-bottom: 14px;
+  }
+  .cp-section-title {
+    font-size: 11px;
+    color: #999;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .cp-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cp-btn {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid #e8e8e8;
+    background: #fafafa;
+    color: #666;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .cp-btn:hover { border-color: #ccc; }
+  .cp-btn.active {
+    background: linear-gradient(135deg, #FF5000, #FF7000);
+    color: #fff;
+    border-color: #FF5000;
+  }
+  .cp-intent-btn {
+    width: 100%;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    border: 1px solid #e8e8e8;
+    background: #fafafa;
+    color: #666;
+    cursor: pointer;
+    font-weight: 500;
+    margin-bottom: 5px;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .cp-intent-btn:last-child { margin-bottom: 0; }
+  .cp-intent-btn.active {
+    background: #fff5f0;
+    border-color: #FF5000;
+    color: #333;
+  }
+  .cp-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Animations */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .anim-in { animation: slideUp 0.35s ease forwards; }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .phone-frame { width: 100%; height: 100vh; border-radius: 0; margin: 0; }
+    .control-panel {
+      position: fixed;
+      bottom: 0;
+      top: auto;
+      left: 0;
+      right: 0;
+      width: 100%;
+      border-radius: 16px 16px 0 0;
+      max-height: 45vh;
+      overflow-y: auto;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Control Panel -->
+<div class="control-panel">
+  <div class="cp-section">
+    <div class="cp-section-title">搜索关键词</div>
+    <div class="cp-btns">
+      <button onclick="setKeyword('chongfeng')" id="cp-kw-chongfeng" class="cp-btn active">冲锋衣</button>
+      <button onclick="setKeyword('zhongkao')" id="cp-kw-zhongkao" class="cp-btn">中考跑鞋</button>
+    </div>
+  </div>
+  <div class="cp-section">
+    <div class="cp-section-title">导购阶段 / 意图判断</div>
+    <button onclick="setIntent('enter')" id="cp-int-enter" class="cp-intent-btn active">
+      <span class="cp-dot" style="background:#999"></span>用户进入 · 头部导购
+    </button>
+    <button onclick="setIntent('A')" id="cp-int-A" class="cp-intent-btn">
+      <span class="cp-dot" style="background:#ff7a00"></span>A · 单品牌深度挑选
+    </button>
+    <button onclick="setIntent('B')" id="cp-int-B" class="cp-intent-btn">
+      <span class="cp-dot" style="background:#0066ff"></span>B · 跨品牌横向对比
+    </button>
+    <button onclick="setIntent('C')" id="cp-int-C" class="cp-intent-btn">
+      <span class="cp-dot" style="background:#389e0d"></span>C · 场景需求未明确
+    </button>
+    <button onclick="setIntent('D')" id="cp-int-D" class="cp-intent-btn">
+      <span class="cp-dot" style="background:#cf1322"></span>D · 找不到/流失风险
+    </button>
+    <button onclick="setIntent('E')" id="cp-int-E" class="cp-intent-btn">
+      <span class="cp-dot" style="background:#d48806"></span>E · 已选好/连带扩散
+    </button>
+  </div>
+</div>
+
+<!-- Phone -->
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>22:48</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <svg width="16" height="12" viewBox="0 0 18 12" fill="currentColor"><path d="M1 8h2v3H1zM5 6h2v5H5zM9 4h2v7H9zM13 2h2v9h-2z"/></svg>
+      <svg width="14" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M1 4a1 1 0 011-1h8a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4z" fill-opacity="0.3"/><path d="M1 5a1 1 0 011-1h8a1 1 0 011 1v4a1 1 0 01-1 1H2a1 1 0 01-1-1V5z"/><rect x="13" y="3" width="2" height="6" rx="0.5"/></svg>
+    </div>
+  </div>
+
+  <!-- Search Header -->
+  <div class="search-header">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+      <span id="search-text" class="text-sm text-gray-700 font-medium">冲锋衣</span>
+    </div>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 6h18M8 12h8M6 18h12"/></svg>
+  </div>
+
+  <!-- Scrollable Content -->
+  <div class="scroll-area" id="scroll-area">
+    <div id="page-content">
+      <!-- Dynamic -->
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active"><div class="tab-icon">🏠</div><span class="tab-label">首页</span></div>
+    <div class="tab-item"><div class="tab-icon">🎬</div><span class="tab-label">逛逛</span></div>
+    <div class="tab-item"><div class="tab-icon">💬</div><span class="tab-label">消息</span></div>
+    <div class="tab-item"><div class="tab-icon">🛒</div><span class="tab-label">购物车</span></div>
+    <div class="tab-item"><div class="tab-icon">👤</div><span class="tab-label">我的</span></div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+
+const products = {
+  chongfeng: [
+    { img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=400&h=400&fit=crop', price: '2899', original: '3200', title: 'ARC\'TERYX始祖鸟 Beta AR硬壳冲锋衣Gore-Tex防风防水', sold: '2000+人付款', shop: '始祖鸟官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'包邮',c:'gray'}] },
+    { img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=400&h=400&fit=crop', price: '1498', original: '1898', title: 'TheNorthFace北面1996复刻冲锋衣男女同款户外防风', sold: '10万+人付款', shop: '北面官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'官方立减',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop', price: '899', original: '1299', title: 'KAILAS凯乐石Mont-X硬壳冲锋衣暴雨级防水登山服', sold: '5000+人付款', shop: '凯乐石旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'新品',c:'green'}] },
+    { img: 'https://images.unsplash.com/photo-1551028919-ac76c9028d1e?w=400&h=400&fit=crop', price: '599', original: '899', title: '骆驼户外冲锋衣三合一可拆卸抓绒内胆防风防水外套', sold: '3万+人付款', shop: '骆驼官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'百亿补贴',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop', price: '2199', original: '2599', title: 'Patagonia巴塔哥尼亚Torrentshell 3L环保冲锋衣', sold: '800+人付款', shop: 'Patagonia旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'环保',c:'green'}] },
+    { img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop', price: '399', original: '599', title: '伯希和户外冲锋衣女款防风防水透气单层外套', sold: '2万+人付款', shop: '伯希和旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'热销',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=400&h=400&fit=crop', price: '3299', original: '3699', title: '始祖鸟Alpha SV第六代硬壳冲锋衣专业登山', sold: '500+人付款', shop: '始祖鸟官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'专业级',c:'gray'}] },
+    { img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=400&h=400&fit=crop', price: '1099', original: '1399', title: '北面1986复刻冲锋衣Mountain Jacket防风外套', sold: '5万+人付款', shop: '北面官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'经典款',c:'orange'}] },
+  ],
+  zhongkao: [
+    { img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop', price: '299', original: '399', title: '多威锋芒4代中考体测鞋男女田径训练跑步鞋', sold: '5万+人付款', shop: '多威旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'体测专用',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop', price: '199', original: '299', title: '海尔斯中考体育专用鞋立定跳远跑步训练鞋', sold: '10万+人付款', shop: '海尔斯旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'老字号',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop', price: '690', original: '890', title: 'ASICS亚瑟士JOLT 4青少年中考跑步鞋轻量', sold: '1万+人付款', shop: '亚瑟士旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'轻量',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop', price: '359', original: '499', title: '李宁超轻20代中考跑步鞋透气网面体测鞋', sold: '8万+人付款', shop: '李宁官方旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'超轻',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1560769629-97513d1215de?w=400&h=400&fit=crop', price: '259', original: '359', title: '特步飞速3.0中考体测鞋防滑耐磨跑步鞋', sold: '3万+人付款', shop: '特步旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'防滑',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&h=400&fit=crop', price: '429', original: '599', title: '耐克Downshifter 12青少年跑步鞋中考训练', sold: '2万+人付款', shop: '耐克官方旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'国际品牌',c:'gray'}] },
+    { img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop', price: '159', original: '229', title: '多威MR3515体测训练鞋耐磨防滑跑步鞋', sold: '8万+人付款', shop: '多威旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'耐穿',c:'orange'}] },
+    { img: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop', price: '459', original: '599', title: '李宁赤兔7Pro中考竞速跑鞋轻量回弹体测', sold: '4万+人付款', shop: '李宁官方旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'竞速',c:'orange'}] },
+  ],
+};
+
+const brands = {
+  chongfeng: [
+    { name: '北面', img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=100&h=100&fit=crop' },
+    { name: '始祖鸟', img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=100&h=100&fit=crop' },
+    { name: '迪桑特', img: 'https://images.unsplash.com/photo-1551028919-ac76c9028d1e?w=100&h=100&fit=crop' },
+    { name: '伯希和', img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=100&h=100&fit=crop' },
+  ],
+  zhongkao: [
+    { name: '多威', img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=100&h=100&fit=crop' },
+    { name: '亚瑟士', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop' },
+    { name: '特步', img: 'https://images.unsplash.com/photo-1560769629-97513d1215de?w=100&h=100&fit=crop' },
+    { name: '李宁', img: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=100&h=100&fit=crop' },
+    { name: 'Hoka', img: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop' },
+  ],
+};
+
+const aiContent = {
+  chongfeng: {
+    enter: {
+      text: '国际高端<strong>对标极端天气</strong>，国产品牌<strong>平衡性能与价格</strong>。国际中端则提供基础防护。<br><br><span class="key-point">重点</span> 冲锋衣核心看<strong>防水指数+透气指数+三层结构</strong>，日常通勤选软壳就够，爬山徒步建议硬壳。',
+      chips: ['国际品牌', '国产品牌', '高性价比'],
+      showBrands: true,
+    },
+    A: {
+      text: '看你挑了好几件<strong>北面</strong>，给你划重点——「1986复刻」版型偏大适合叠穿，「1994 Mountain」轻量但防风弱一些。你平时穿去通勤还是户外？',
+      options: ['🏔️ 户外徒步', '🏃 日常通勤', '🔍 对比型号'],
+      label: 'intent-a',
+      labelText: '意图A · 单品牌深度挑选',
+    },
+    B: {
+      text: '你刚才看了<strong>始祖鸟、北面、凯乐石</strong>三家，如果预算2k以内，凯乐石性价比更高；如果追求极端环境防护，始祖鸟的Gore-Tex Pro更硬核。你大概什么预算区间？',
+      options: ['💰 1k以内', '💰 1-2k', '💰 2k以上'],
+      label: 'intent-b',
+      labelText: '意图B · 跨品牌横向对比',
+    },
+    C: {
+      text: '如果你是想搭一套<strong>春秋徒步装备</strong>，冲锋衣+速干打底+软壳裤是黄金三件套，预算1.5k左右就能配齐。想先看穿搭攻略还是直接选单品？',
+      options: ['📖 看攻略', '🛒 直接选单品', '💬 报预算'],
+      label: 'intent-c',
+      labelText: '意图C · 场景需求未明确',
+    },
+    D: {
+      text: '是不是还没看到合适的？换个思路——你是更看重<strong>颜值出片</strong>、还是<strong>功能性拉满</strong>？或者报个预算，我帮你重新筛一波。',
+      options: ['😎 颜值优先', '⚡ 功能优先', '💰 报预算'],
+      label: 'intent-d',
+      labelText: '意图D · 找不到/流失风险',
+    },
+    E: {
+      text: '这件配一条<strong>速干软壳裤</strong>会更完整，徒步出汗不粘腿。要一起看下裤装推荐吗？',
+      options: ['👖 看裤装', '🧦 看袜子', '🎒 看登山包'],
+      label: 'intent-e',
+      labelText: '意图E · 已选好/连带扩散',
+    },
+  },
+  zhongkao: {
+    enter: {
+      text: '想要孩子一双助力中考体测的专业跑鞋，选对关键无事半功倍。<br><br><span class="key-point">重点</span> 以<strong>轻量强化设计</strong>，塑轻起轻落省力，且缓震需要明显。<br><span class="key-point">重点</span> 关注<strong>全掌融合包裹感</strong>，后跟加固支撑，避免跑步打滑。<br><span class="key-point">重点</span> 选择<strong>耐磨橡胶大底</strong>，抓地纹路深，操场湿垫不怕摔。',
+      chips: ['综合', '百亿补贴', '品牌', '李宁', '多威', '赤兔'],
+      showBrands: true,
+    },
+    A: {
+      text: '你看了好几双<strong>多威</strong>，提醒一下——锋芒4代更轻更弹适合速度型，MR3515鞋底更耐磨适合训练。如果你只考一次、追求极致轻，锋芒4代更优；如果平时也要训练，MR3515更耐造。',
+      options: ['选锋芒4代', '选MR3515', '再看看'],
+      label: 'intent-a',
+      labelText: '意图A · 单品牌深度挑选',
+    },
+    B: {
+      text: '<strong>李宁超轻20代</strong>单只190g，<strong>多威MR3515</strong>是210g但鞋底更耐磨。亚瑟士保护性最强但价高。如果你只考一次、追求极致轻，李宁更优；如果平时也要训练，多威更耐造。',
+      options: ['选李宁', '选多威', '选亚瑟士'],
+      label: 'intent-b',
+      labelText: '意图B · 跨品牌横向对比',
+    },
+    C: {
+      text: '「中考跑鞋」可以分两条线——<strong>只考一次</strong>选极致轻量款（190g以内），<strong>平时也训练</strong>选耐磨耐穿款。你孩子是只在考试穿，还是平时体育课也要穿？',
+      options: ['只考试穿', '平时也训练', '不确定'],
+      label: 'intent-c',
+      labelText: '意图C · 场景需求未明确',
+    },
+    D: {
+      text: '你是不是想要「<strong>特别轻又特别便宜</strong>」的？实话讲这两点在跑鞋上比较难兼得。如果只能保一个，你优先轻量还是优先性价比？',
+      options: ['优先轻量', '优先性价比', '重新搜索'],
+      label: 'intent-d',
+      labelText: '意图D · 找不到/流失风险',
+    },
+    E: {
+      text: '体考前建议配一双<strong>专业跑步袜</strong>，减少磨脚和起泡。体考前一周记得穿新鞋<strong>磨合2-3次</strong>，别考试当天才第一次穿。需要看下袜子吗？',
+      options: ['看跑步袜', '看磨合攻略', '已了解'],
+      label: 'intent-e',
+      labelText: '意图E · 已选好/连带扩散',
+    },
+  },
+};
+
+// ============ STATE ============
+let kw = 'chongfeng';
+let intent = 'enter';
+
+// ============ RENDER ============
+function render() {
+  const container = document.getElementById('page-content');
+  const prods = products[kw];
+  const ai = aiContent[kw][intent];
+
+  let html = '';
+
+  // === Header AI Guide (only for enter) ===
+  if (intent === 'enter') {
+    html += renderHeaderAI(ai);
+  }
+
+  // === Filter Tabs ===
+  html += renderFilterTabs();
+
+  // === Promo Banner ===
+  html += renderPromoBanner();
+
+  // === Product Grid ===
+  html += '<div class="product-grid">';
+
+  // First 2 products
+  html += renderProduct(prods[0], 0);
+  html += renderProduct(prods[1], 1);
+
+  // Inline AI (for non-enter intents, after first row)
+  if (intent !== 'enter') {
+    html += renderInlineAI(ai);
+  }
+
+  // Next 2 products
+  html += renderProduct(prods[2], 2);
+  html += renderProduct(prods[3], 3);
+
+  // Second inline AI for some intents (browse continuation)
+  if (intent === 'A' || intent === 'B') {
+    const followUp = intent === 'A'
+      ? { text: '「北面1986」这个配色最近很火，<strong>山系穿搭</strong>拍照特别出片。如果你是用来城市通勤+周末轻徒步，这款一件就能覆盖。确定看看这款吗？', options: ['👀 看详情', '💰 比价', '🔙 继续挑'], label: 'intent-a', labelText: '意图A · 深度挑选跟进' }
+      : { text: '如果预算明确的话，我可以直接帮你筛出<strong>每个价位段最值得买的一款</strong>，不用你自己来回比。需要吗？', options: ['需要', '我自己看', '换个维度'], label: 'intent-b', labelText: '意图B · 对比跟进' };
+    html += renderInlineAI(followUp);
+  }
+
+  // Last products
+  html += renderProduct(prods[4], 4);
+  html += renderProduct(prods[5], 5);
+  html += renderProduct(prods[6], 6);
+  html += renderProduct(prods[7], 7);
+
+  html += '</div>'; // end product-grid
+
+  container.innerHTML = html;
+
+  // Update search text
+  document.getElementById('search-text').textContent = kw === 'chongfeng' ? '冲锋衣' : '中考跑鞋';
+
+  // Scroll to top
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+function renderHeaderAI(ai) {
+  const brandPills = brands[kw].map(b => `
+    <div class="brand-pill">
+      <img src="${b.img}" class="brand-pill-img" alt="">
+      <span class="brand-pill-name">${b.name}</span>
+    </div>
+  `).join('');
+
+  const chipsHtml = ai.chips.map((c, i) =>
+    `<span class="ai-chip ${i === 0 ? 'active' : ''}">${c}</span>`
+  ).join('');
+
+  return `
+    <div class="ai-header anim-in">
+      <div class="ai-header-top">
+        <div class="ai-avatar-small">🐱</div>
+        <div class="ai-title-text">
+          天猫AI导购员
+          <span class="ai-badge">AI</span>
+        </div>
+      </div>
+      <div class="ai-content-text">${ai.text}</div>
+      ${ai.showBrands ? `<div class="brand-pills">${brandPills}</div>` : ''}
+      <div class="ai-action-bar">
+        <div class="ai-action-left">${chipsHtml}</div>
+        <div class="ai-go-btn">去看看 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFilterTabs() {
+  const tabs = ['综合', '销量', '价格', '店铺', '筛选'];
+  const tabsHtml = tabs.map((t, i) =>
+    `<span class="filter-tab ${i === 0 ? 'active' : ''}">${t}</span>`
+  ).join('');
+
+  return `
+    <div class="filter-tabs">
+      ${tabsHtml}
+      <span class="filter-tab ai-tab">🐱 AI搜一下</span>
+    </div>
+  `;
+}
+
+function renderPromoBanner() {
+  return `
+    <div class="promo-banner anim-in">
+      <div class="promo-left">
+        <span class="promo-tag">618抢先购</span>
+        <span class="promo-text">8.5折起 · 官方立减</span>
+      </div>
+      <span class="promo-time">消费券 00:11:13后失效</span>
+    </div>
+  `;
+}
+
+function renderProduct(p, idx) {
+  const tagsHtml = p.tags.map(t => `<span class="ptag ptag-${t.c}">${t.t}</span>`).join('');
+  return `
+    <div class="product-card anim-in" style="animation-delay:${idx*0.04}s">
+      <div class="product-img-wrap">
+        <img src="${p.img}" class="product-img" alt="">
+        <span class="product-tag-618">618抢先购</span>
+      </div>
+      <div class="product-info">
+        <div class="price-row">
+          <span class="price-symbol">¥</span>
+          <span class="price-num">${p.price}</span>
+          <span class="price-original">¥${p.original}</span>
+        </div>
+        <p class="product-title">${p.title}</p>
+        <div class="product-meta">
+          <span class="product-sold">${p.sold}</span>
+          <span class="product-shop">${p.shop}</span>
+        </div>
+        <div class="product-tags-row">${tagsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderInlineAI(ai) {
+  const labelHtml = ai.label ? `<span class="intent-label ${ai.label}">${ai.labelText}</span>` : '';
+  const optsHtml = ai.options.map(opt =>
+    `<button class="ai-inline-btn" onclick="this.classList.toggle('selected')">${opt}</button>`
+  ).join('');
+
+  return `
+    <div class="ai-inline anim-in">
+      <div class="ai-inline-avatar">🐱</div>
+      <div class="ai-inline-body">
+        ${labelHtml}
+        <p class="ai-inline-text">${ai.text}</p>
+        <div class="ai-inline-options">${optsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+// ============ CONTROLS ============
+function setKeyword(newKw) {
+  kw = newKw;
+  intent = 'enter';
+  updateControls();
+  render();
+}
+
+function setIntent(newIntent) {
+  intent = newIntent;
+  updateControls();
+  render();
+}
+
+function updateControls() {
+  // Keyword buttons
+  document.querySelectorAll('.cp-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('cp-kw-' + kw).classList.add('active');
+
+  // Intent buttons
+  document.querySelectorAll('.cp-intent-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('cp-int-' + intent).classList.add('active');
+}
+
+// ============ INIT ============
+render();
+</script>
+
+</body>
+</html>
