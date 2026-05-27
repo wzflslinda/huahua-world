@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>手猫AI导购引擎V4 · 全品类前台视觉稿</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  * { -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #1a1a2e; }
+
+  /* Layout */
+  .main-layout { display: flex; gap: 24px; padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .control-panel { width: 280px; flex-shrink: 0; background: #16213e; border-radius: 20px; padding: 20px; color: #fff; height: fit-content; position: sticky; top: 24px; }
+  .phone-wrapper { flex: 1; display: flex; justify-content: center; }
+
+  /* Control Panel */
+  .cp-section { margin-bottom: 20px; }
+  .cp-title { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .cp-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cp-btn { padding: 6px 12px; border-radius: 10px; font-size: 12px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; cursor: pointer; font-weight: 500; transition: all 0.15s; }
+  .cp-btn:hover { border-color: #64748b; color: #e2e8f0; }
+  .cp-btn.active { background: linear-gradient(135deg, #FF5000, #FF7000); color: #fff; border-color: #FF5000; }
+  .cp-intent-btn { width: 100%; padding: 8px 12px; border-radius: 10px; font-size: 11px; border: 1px solid #334155; background: #1e293b; color: #94a3b8; cursor: pointer; font-weight: 500; margin-bottom: 6px; text-align: left; display: flex; align-items: center; gap: 8px; transition: all 0.15s; }
+  .cp-intent-btn:last-child { margin-bottom: 0; }
+  .cp-intent-btn:hover { border-color: #64748b; }
+  .cp-intent-btn.active { background: #2d1b00; border-color: #FF5000; color: #fff; }
+  .cp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Phone Frame */
+  .phone-frame { width: 390px; height: 844px; background: #fff; border-radius: 44px; box-shadow: 0 25px 80px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; position: relative; }
+  .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 126px; height: 34px; background: #000; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; z-index: 1000; }
+  .status-bar { height: 48px; background: #fff; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 28px 6px 28px; font-size: 15px; font-weight: 600; color: #000; }
+  .search-header { background: #fff; padding: 4px 12px 8px 12px; display: flex; align-items: center; gap: 8px; }
+  .search-box { flex: 1; height: 34px; background: #f5f5f5; border-radius: 17px; display: flex; align-items: center; padding: 0 12px; gap: 6px; }
+  .scroll-area { height: calc(100% - 48px - 46px - 64px); overflow-y: auto; background: #f5f5f5; }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* AI Header */
+  .ai-header { background: #fff; padding: 12px 12px 8px 12px; border-bottom: 1px solid #f0f0f0; }
+  .ai-header-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .ai-avatar-small { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #FF5000, #FF9000); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .ai-title-text { font-size: 14px; font-weight: 700; color: #333; display: flex; align-items: center; gap: 6px; }
+  .ai-badge { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: linear-gradient(135deg, #FF5000, #FF9000); color: #fff; font-weight: 600; }
+  .ai-content-text { font-size: 13px; line-height: 1.7; color: #333; margin-bottom: 10px; }
+  .ai-content-text strong { color: #FF5000; font-weight: 600; }
+  .key-point { display: inline-flex; align-items: center; gap: 2px; background: #fff5f0; color: #FF5000; padding: 0 5px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-right: 2px; }
+  .brand-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; }
+  .brand-pills::-webkit-scrollbar { display: none; }
+  .brand-pill { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 58px; cursor: pointer; }
+  .brand-pill-img { width: 48px; height: 48px; border-radius: 50%; background: #f8f8f8; object-fit: cover; border: 1px solid #f0f0f0; }
+  .brand-pill-name { font-size: 11px; color: #666; white-space: nowrap; }
+  .ai-action-bar { display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 0.5px solid #f5f5f5; }
+  .ai-chip { padding: 4px 10px; border-radius: 12px; font-size: 12px; border: 0.5px solid #e0e0e0; background: #fafafa; color: #666; cursor: pointer; }
+  .ai-chip.active { background: #fff5f0; border-color: #FF5000; color: #FF5000; font-weight: 600; }
+  .ai-go-btn { display: flex; align-items: center; gap: 2px; font-size: 13px; color: #999; cursor: pointer; }
+
+  /* Filter Tabs */
+  .filter-tabs { display: flex; align-items: center; background: #fff; padding: 0 12px; height: 40px; gap: 16px; border-bottom: 0.5px solid #f0f0f0; }
+  .filter-tab { font-size: 13px; color: #666; white-space: nowrap; cursor: pointer; position: relative; }
+  .filter-tab.active { color: #FF0036; font-weight: 600; }
+  .filter-tab.active::after { content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 16px; height: 2.5px; background: #FF0036; border-radius: 2px; }
+  .filter-tab.ai-tab { display: flex; align-items: center; gap: 3px; background: linear-gradient(135deg, #FF5000, #FF9000); color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+
+  /* Promo Banner */
+  .promo-banner { margin: 8px 12px; background: linear-gradient(90deg, #fff0f2, #fff5f0); border-radius: 10px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .promo-tag { background: #FF0036; color: #fff; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: 600; }
+  .promo-text { font-size: 12px; color: #333; font-weight: 500; }
+  .promo-time { font-size: 11px; color: #FF0036; }
+
+  /* Product Grid */
+  .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 6px 80px 6px; }
+  .product-card { background: #fff; border-radius: 12px; overflow: hidden; }
+  .product-img-wrap { position: relative; width: 100%; aspect-ratio: 1; background: #f8f8f8; }
+  .product-img { width: 100%; height: 100%; object-fit: cover; }
+  .product-tag-618 { position: absolute; top: 8px; left: 8px; background: linear-gradient(135deg, #FF0036, #FF6B6B); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 700; }
+  .product-info { padding: 8px; }
+  .price-row { display: flex; align-items: baseline; gap: 2px; }
+  .price-symbol { font-size: 11px; color: #FF0036; font-weight: 600; }
+  .price-num { font-size: 18px; color: #FF0036; font-weight: 700; }
+  .price-original { font-size: 11px; color: #999; text-decoration: line-through; margin-left: 4px; }
+  .product-title { font-size: 12px; color: #333; line-height: 1.45; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-weight: 500; }
+  .product-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 11px; color: #999; }
+  .product-sold { color: #999; }
+  .product-shop { color: #999; display: flex; align-items: center; gap: 2px; }
+  .product-tags-row { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+  .ptag { font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 500; }
+  .ptag-red { background: #fff0f2; color: #FF0036; }
+  .ptag-orange { background: #fff5e6; color: #FF6A00; }
+  .ptag-green { background: #f0f9f0; color: #52c41a; }
+  .ptag-gray { background: #f5f5f5; color: #999; }
+
+  /* Inline AI Bubble */
+  .ai-inline { grid-column: 1 / -1; background: #fff; border-radius: 14px; margin: 2px 0; padding: 12px; display: flex; gap: 10px; box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+  .ai-inline-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #FF5000, #FF9000); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .ai-inline-body { flex: 1; }
+  .ai-inline-text { font-size: 13.5px; line-height: 1.65; color: #333; }
+  .ai-inline-text strong { color: #FF5000; font-weight: 600; }
+  .ai-inline-options { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .ai-inline-btn { padding: 5px 12px; border-radius: 14px; font-size: 12px; border: 0.5px solid #ffd4b8; background: #fff8f3; color: #FF5000; font-weight: 500; cursor: pointer; }
+  .ai-inline-btn:active { opacity: 0.7; }
+  .ai-inline-btn.selected { background: #FF5000; color: #fff; border-color: #FF5000; }
+  .intent-label { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-bottom: 6px; font-weight: 600; }
+  .intent-a { background: #fff0e6; color: #ff7a00; }
+  .intent-b { background: #e6f0ff; color: #0066ff; }
+  .intent-c { background: #e6f7e6; color: #389e0d; }
+  .intent-d { background: #fff0f0; color: #cf1322; }
+  .intent-e { background: #fffbe6; color: #d48806; }
+  .intent-f { background: #f0e6ff; color: #7c3aed; }
+  .intent-g { background: #e6f7ff; color: #0891b2; }
+  .intent-h { background: #fef3c7; color: #b45309; }
+  .intent-i { background: #fce7f3; color: #db2777; }
+  .intent-j { background: #d1fae5; color: #059669; }
+
+  /* Bottom Tab Bar */
+  .tab-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border-top: 0.5px solid #f0f0f0; display: flex; justify-content: space-around; align-items: flex-start; padding-top: 6px; z-index: 1000; }
+  .tab-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .tab-icon { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .tab-label { font-size: 10px; color: #999; }
+  .tab-item.active .tab-label { color: #FF5000; }
+
+  /* Animations */
+  @keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .anim-in { animation: slideUp 0.35s ease forwards; }
+
+  /* Responsive */
+  @media (max-width: 900px) { .main-layout { flex-direction: column; } .control-panel { width: 100%; position: static; } .phone-frame { width: 100%; max-width: 390px; height: 700px; } }
+</style>
+</head>
+<body>
+
+<div class="main-layout">
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="cp-section">
+      <div class="cp-title">行业选择</div>
+      <div class="cp-btns" id="industry-btns">
+        <button onclick="setIndustry('sports')" class="cp-btn active">🏔️ 运动户外</button>
+        <button onclick="setIndustry('beauty')" class="cp-btn">💄 美妆</button>
+        <button onclick="setIndustry('baby')" class="cp-btn">🍼 母婴</button>
+        <button onclick="setIndustry('appliance')" class="cp-btn">🧊 大家电</button>
+        <button onclick="setIndustry('smallappliance')" class="cp-btn"> 小家电</button>
+        <button onclick="setIndustry('decoration')" class="cp-btn">🏠 家装</button>
+        <button onclick="setIndustry('home')" class="cp-btn">🛏️ 家居</button>
+        <button onclick="setIndustry('health')" class="cp-btn">💊 医药健康</button>
+      </div>
+    </div>
+    <div class="cp-section">
+      <div class="cp-title">关键词类型</div>
+      <div class="cp-btns" id="kw-type-btns">
+        <button onclick="setKWType('knowledge')" id="cp-kw-knowledge" class="cp-btn active">知识类品类词</button>
+        <button onclick="setKWType('attribute')" id="cp-kw-attribute" class="cp-btn">主观属性品类词</button>
+      </div>
+    </div>
+    <div class="cp-section">
+      <div class="cp-title">意图类型</div>
+      <button onclick="setIntent('enter')" id="cp-int-enter" class="cp-intent-btn active">
+        <span class="cp-dot" style="background:#999"></span>用户进入 · 头部导购
+      </button>
+      <button onclick="setIntent('A')" id="cp-int-A" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#ff7a00"></span>A · 单品牌深度挑选
+      </button>
+      <button onclick="setIntent('B')" id="cp-int-B" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#0066ff"></span>B · 跨品牌横向对比
+      </button>
+      <button onclick="setIntent('C')" id="cp-int-C" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#389e0d"></span>C · 场景需求未明确
+      </button>
+      <button onclick="setIntent('D')" id="cp-int-D" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#cf1322"></span>D · 找不到/流失风险
+      </button>
+      <button onclick="setIntent('E')" id="cp-int-E" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#d48806"></span>E · 已选好/连带扩散
+      </button>
+      <button onclick="setIntent('F')" id="cp-int-F" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#7c3aed"></span>F · 规格/尺码纠结
+      </button>
+      <button onclick="setIntent('G')" id="cp-int-G" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#0891b2"></span>G · 评价驱动决策
+      </button>
+      <button onclick="setIntent('H')" id="cp-int-H" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#b45309"></span>H · 价格敏感犹豫
+      </button>
+      <button onclick="setIntent('I')" id="cp-int-I" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#db2777"></span>I · 凑单/满减驱动
+      </button>
+      <button onclick="setIntent('J')" id="cp-int-J" class="cp-intent-btn">
+        <span class="cp-dot" style="background:#059669"></span>J · 升级/复购偏好
+      </button>
+    </div>
+  </div>
+
+  <!-- Phone -->
+  <div class="phone-wrapper">
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="status-bar">
+        <span>22:48</span>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <svg width="16" height="12" viewBox="0 0 18 12" fill="currentColor"><path d="M1 8h2v3H1zM5 6h2v5H5zM9 4h2v7H9zM13 2h2v9h-2z"/></svg>
+          <svg width="14" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M1 4a1 1 0 011-1h8a1 1 0 011 1v6a1 1 0 01-1 1H2a1 1 0 01-1-1V4z" fill-opacity="0.3"/><path d="M1 5a1 1 0 011-1h8a1 1 0 011 1v4a1 1 0 01-1 1H2a1 1 0 01-1-1V5z"/><rect x="13" y="3" width="2" height="6" rx="0.5"/></svg>
+        </div>
+      </div>
+      <div class="search-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2.5" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <div class="search-box">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          <span id="search-text" class="text-sm text-gray-700 font-medium">冲锋衣</span>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M3 6h18M8 12h8M6 18h12"/></svg>
+      </div>
+      <div class="scroll-area" id="scroll-area">
+        <div id="page-content"></div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item active"><div class="tab-icon">🏠</div><span class="tab-label">首页</span></div>
+        <div class="tab-item"><div class="tab-icon">🎬</div><span class="tab-label">逛逛</span></div>
+        <div class="tab-item"><div class="tab-icon">💬</div><span class="tab-label">消息</span></div>
+        <div class="tab-item"><div class="tab-icon"></div><span class="tab-label">购物车</span></div>
+        <div class="tab-item"><div class="tab-icon">👤</div><span class="tab-label">我的</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const industries = {
+  sports: {
+    name: '运动户外',
+    knowledge: {
+      keyword: '冲锋衣',
+      text: '国际高端<strong>对标极端天气</strong>，国产品牌<strong>平衡性能与价格</strong>。国际中端则提供基础防护。<br><br><span class="key-point">重点</span> 冲锋衣核心看<strong>防水指数+透气指数+三层结构</strong>，日常通勤选软壳就够，爬山徒步建议硬壳。',
+      chips: ['国际品牌', '国产品牌', '高性价比'],
+      brands: [
+        { name: '北面', img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=100&h=100&fit=crop' },
+        { name: '始祖鸟', img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=100&h=100&fit=crop' },
+        { name: '迪桑特', img: 'https://images.unsplash.com/photo-1551028919-ac76c9028d1e?w=100&h=100&fit=crop' },
+        { name: '伯希和', img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '中考跑鞋',
+      text: '想要孩子一双助力中考体测的专业跑鞋，选对关键无事半功倍。<br><br><span class="key-point">重点</span> 以<strong>轻量强化设计</strong>，塑轻起轻落省力，且缓震需要明显。<br><span class="key-point">重点</span> 关注<strong>全掌融合包裹感</strong>，后跟加固支撑，避免跑步打滑。<br><span class="key-point">重点</span> 选择<strong>耐磨橡胶大底</strong>，抓地纹路深，操场湿垫不怕摔。',
+      chips: ['综合', '百亿补贴', '品牌', '李宁', '多威'],
+      brands: [
+        { name: '多威', img: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=100&h=100&fit=crop' },
+        { name: '亚瑟士', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop' },
+        { name: '特步', img: 'https://images.unsplash.com/photo-1560769629-97513d1215de?w=100&h=100&fit=crop' },
+        { name: '李宁', img: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=100&h=100&fit=crop' },
+        { name: 'Hoka', img: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=400&h=400&fit=crop', price: '2899', original: '3200', title: 'ARC\'TERYX始祖鸟 Beta AR硬壳冲锋衣Gore-Tex防风防水', sold: '2000+人付款', shop: '始祖鸟官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'包邮',c:'gray'}] },
+      { img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=400&h=400&fit=crop', price: '1498', original: '1898', title: 'TheNorthFace北面1996复刻冲锋衣男女同款户外防风', sold: '10万+人付款', shop: '北面官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'官方立减',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop', price: '899', original: '1299', title: 'KAILAS凯乐石Mont-X硬壳冲锋衣暴雨级防水登山服', sold: '5000+人付款', shop: '凯乐石旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'新品',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1551028919-ac76c9028d1e?w=400&h=400&fit=crop', price: '599', original: '899', title: '骆驼户外冲锋衣三合一可拆卸抓绒内胆防风防水外套', sold: '3万+人付款', shop: '骆驼官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'百亿补贴',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=400&h=400&fit=crop', price: '2199', original: '2599', title: 'Patagonia巴塔哥尼亚Torrentshell 3L环保冲锋衣', sold: '800+人付款', shop: 'Patagonia旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'环保',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop', price: '399', original: '599', title: '伯希和户外冲锋衣女款防风防水透气单层外套', sold: '2万+人付款', shop: '伯希和旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'热销',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?w=400&h=400&fit=crop', price: '3299', original: '3699', title: '始祖鸟Alpha SV第六代硬壳冲锋衣专业登山', sold: '500+人付款', shop: '始祖鸟官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'专业级',c:'gray'}] },
+      { img: 'https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=400&h=400&fit=crop', price: '1099', original: '1399', title: '北面1986复刻冲锋衣Mountain Jacket防风外套', sold: '5万+人付款', shop: '北面官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'经典款',c:'orange'}] },
+    ],
+  },
+  beauty: {
+    name: '美妆',
+    knowledge: {
+      keyword: '防晒霜',
+      text: '防晒核心看<strong>SPF值+PA值+成膜速度</strong>，日常通勤SPF30就够，海边度假建议SPF50+。安热沙、资生堂、兰蔻是站内热门。<br><br><span class="key-point">重点</span> 化学防晒轻薄但可能刺激，物理防晒温和但易泛白，物化结合是最佳平衡。',
+      chips: ['国际大牌', '国货之光', '平价首选'],
+      brands: [
+        { name: '安热沙', img: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=100&h=100&fit=crop' },
+        { name: '资生堂', img: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=100&h=100&fit=crop' },
+        { name: '兰蔻', img: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=100&h=100&fit=crop' },
+        { name: '欧莱雅', img: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '清爽防晒',
+      text: '「清爽防晒」其实要满足三个隐形门槛：<strong>轻薄成膜不闷痘</strong>、<strong>油皮友好不泛油光</strong>、<strong>快速吸收不黏腻</strong>。珀莱雅、薇诺娜是敏感肌圈的老口碑。<br><br><span class="key-point">重点</span> 你是油皮还是干皮？痘痘肌建议选物理防晒。',
+      chips: ['油皮适用', '干皮适用', '敏感肌', '痘痘肌'],
+      brands: [
+        { name: '珀莱雅', img: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=100&h=100&fit=crop' },
+        { name: '薇诺娜', img: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=100&h=100&fit=crop' },
+        { name: '理肤泉', img: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=100&h=100&fit=crop' },
+        { name: '适乐肤', img: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=400&fit=crop', price: '268', original: '320', title: '安热沙小金瓶防晒SPF50+PA++++防水防汗面部', sold: '50万+人付款', shop: '安热沙官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'防晒榜TOP1',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=400&fit=crop', price: '189', original: '250', title: '资生堂新艳阳夏防晒乳SPF50+轻薄不油腻', sold: '20万+人付款', shop: '资生堂官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'官方立减',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop', price: '395', original: '450', title: '兰蔻小白管防晒SPF50PA++++轻盈保湿', sold: '15万+人付款', shop: '兰蔻官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'新品',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop', price: '139', original: '199', title: '欧莱雅多重防护防晒SPF50+全波段防护', sold: '30万+人付款', shop: '欧莱雅官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'百亿补贴',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=400&fit=crop', price: '89', original: '129', title: '珀莱雅盾护防晒SPF50+清爽不闷痘油皮', sold: '25万+人付款', shop: '珀莱雅官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'国货之光',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=400&h=400&fit=crop', price: '158', original: '198', title: '薇诺娜清透防晒乳SPF48敏感肌专用物理防晒', sold: '18万+人付款', shop: '薇诺娜官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'敏感肌',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop', price: '350', original: '420', title: '兰蔻清透防晒SPF50+隔离紫外线面部', sold: '12万+人付款', shop: '兰蔻官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'轻薄',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop', price: '99', original: '149', title: '欧莱雅金致防晒SPF50+抗老防晒二合一', sold: '22万+人付款', shop: '欧莱雅官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'抗老',c:'orange'}] },
+    ],
+  },
+  baby: {
+    name: '母婴',
+    knowledge: {
+      keyword: '奶粉',
+      text: '奶粉核心看<strong>段位+配方类型+奶源+蛋白质含量</strong>，0-6个月选1段，6-12个月选2段。飞鹤、a2、爱他美是站内热门。<br><br><span class="key-point">重点</span> 国产奶粉更贴合中国宝宝体质，进口奶粉奶源更优质但价格偏高。',
+      chips: ['国产优选', '进口品质', '有机奶粉'],
+      brands: [
+        { name: '飞鹤', img: 'https://images.unsplash.com/photo-1559715166-5a3f4a4e1e55?w=100&h=100&fit=crop' },
+        { name: 'a2', img: 'https://images.unsplash.com/photo-1584837148348-c01b6d4a4b8d?w=100&h=100&fit=crop' },
+        { name: '爱他美', img: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=100&h=100&fit=crop' },
+        { name: '惠氏', img: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '易吸收奶粉',
+      text: '「易吸收」其实对应三个关键标准：<strong>小分子蛋白好消化</strong>、<strong>添加益生菌不上火</strong>、<strong>乳清蛋白比例高</strong>。皇家美素佳儿、雅培是消化弱宝宝圈的老口碑。<br><br><span class="key-point">重点</span> 宝宝是易上火体质还是肠胃偏弱？不同体质配方侧重点不同。',
+      chips: ['易消化', '不上火', '过敏体质', '早产儿'],
+      brands: [
+        { name: '皇家美素佳儿', img: 'https://images.unsplash.com/photo-1559715166-5a3f4a4e1e55?w=100&h=100&fit=crop' },
+        { name: '雅培', img: 'https://images.unsplash.com/photo-1584837148348-c01b6d4a4b8d?w=100&h=100&fit=crop' },
+        { name: '启赋', img: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=100&h=100&fit=crop' },
+        { name: '伊利', img: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1559715166-5a3f4a4e1e55?w=400&h=400&fit=crop', price: '289', original: '359', title: '飞鹤星飞帆卓睿1段婴儿配方奶粉0-6个月700g', sold: '30万+人付款', shop: '飞鹤官方旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'国产TOP1',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1584837148348-c01b6d4a4b8d?w=400&h=400&fit=crop', price: '368', original: '428', title: 'a2至初1段婴儿配方奶粉0-6个月900g新西兰奶源', sold: '15万+人付款', shop: 'a2官方旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'进口奶源',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop', price: '258', original: '318', title: '爱他美白金版1段婴儿配方奶粉0-6个月800g', sold: '20万+人付款', shop: '爱他美海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'德国品质',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=400&h=400&fit=crop', price: '329', original: '399', title: '惠氏启赋蕴淳1段婴儿配方奶粉0-6个月850g', sold: '12万+人付款', shop: '惠氏官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'高端',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1559715166-5a3f4a4e1e55?w=400&h=400&fit=crop', price: '198', original: '258', title: '伊利金领冠珍护1段婴儿配方奶粉0-6个月900g', sold: '25万+人付款', shop: '伊利母婴旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'性价比',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1584837148348-c01b6d4a4b8d?w=400&h=400&fit=crop', price: '428', original: '528', title: '皇家美素佳儿1段婴儿配方奶粉0-6个月800g', sold: '8万+人付款', shop: '美素佳儿旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'易吸收',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=400&fit=crop', price: '298', original: '368', title: '爱他美奇迹版1段婴儿配方奶粉0-6个月800g', sold: '18万+人付款', shop: '爱他美海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'有机',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1544126592-807ade215a0b?w=400&h=400&fit=crop', price: '158', original: '218', title: '伊利金领冠塞纳牧有机1段奶粉0-6个月700g', sold: '22万+人付款', shop: '伊利母婴旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'有机',c:'green'}] },
+    ],
+  },
+  appliance: {
+    name: '大家电',
+    knowledge: {
+      keyword: '冰箱',
+      text: '冰箱核心看<strong>容量+制冷方式+能效等级+变频</strong>，三口之家400L左右够用，五口之家建议500L+。海尔、美的、卡萨帝是站内热门。<br><br><span class="key-point">重点</span> 风冷无霜不结冰但价格高，直冷便宜但需要手动除霜，选风冷更省心。',
+      chips: ['风冷无霜', '变频节能', '大容量'],
+      brands: [
+        { name: '海尔', img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=100&h=100&fit=crop' },
+        { name: '美的', img: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=100&h=100&fit=crop' },
+        { name: '卡萨帝', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=100&h=100&fit=crop' },
+        { name: '西门子', img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '保鲜冰箱',
+      text: '「保鲜」在不同价位标准差很多——<strong>2000元档</strong>是基础控温保鲜，<strong>5000元档</strong>是保湿保鲜+净味除菌，<strong>8000元+</strong>是全空间保鲜+控氧保鲜。松下、日立是保鲜技术流。<br><br><span class="key-point">重点</span> 你平时食材量大吗？需要存海鲜还是主要存果蔬？',
+      chips: ['保湿保鲜', '净味除菌', '控氧保鲜'],
+      brands: [
+        { name: '松下', img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=100&h=100&fit=crop' },
+        { name: '日立', img: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=100&h=100&fit=crop' },
+        { name: '博世', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=100&h=100&fit=crop' },
+        { name: 'COLMO', img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=400&fit=crop', price: '3999', original: '4999', title: '海尔452L十字对开门冰箱风冷无霜变频节能', sold: '5万+人付款', shop: '海尔官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'以旧换新',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop', price: '2899', original: '3599', title: '美的508L法式四门冰箱风冷无霜一级能效', sold: '8万+人付款', shop: '美的官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'性价比',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&h=400&fit=crop', price: '8999', original: '10999', title: '卡萨帝550L原石系列对开门冰箱全空间保鲜', sold: '2000+人付款', shop: '卡萨帝官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'高端',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', price: '6599', original: '7999', title: '西门子610L对开门冰箱零度保鲜技术', sold: '3000+人付款', shop: '西门子家电旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'德系品质',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=400&fit=crop', price: '1999', original: '2599', title: '海尔218L三门冰箱直冷家用小型租房', sold: '15万+人付款', shop: '海尔官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'租房首选',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=400&h=400&fit=crop', price: '4599', original: '5599', title: '美的516L对开门冰箱风冷无霜净味除菌', sold: '6万+人付款', shop: '美的官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'净味',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&h=400&fit=crop', price: '12999', original: '15999', title: '卡萨帝635L原石系列十字门冰箱F-DPlus控氧', sold: '1000+人付款', shop: '卡萨帝官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'旗舰',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop', price: '4999', original: '5999', title: '西门子484L十字对开门冰箱混冷零度保鲜', sold: '4000+人付款', shop: '西门子家电旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'零度保鲜',c:'green'}] },
+    ],
+  },
+  smallappliance: {
+    name: '小家电',
+    knowledge: {
+      keyword: '破壁机',
+      text: '破壁机核心看<strong>功率+容量+刀片材质+转速</strong>，一人食800ml够用，家庭用建议1.5L+。九阳、苏泊尔、小米是站内热门。<br><br><span class="key-point">重点</span> 刀片数量越多打出的越细腻，8叶刀片是性价比之选，6叶够用但细腻度一般。',
+      chips: ['一人食', '家庭用', '商用'],
+      brands: [
+        { name: '九阳', img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=100&h=100&fit=crop' },
+        { name: '苏泊尔', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=100&h=100&fit=crop' },
+        { name: '美的', img: 'https://images.unsplash.com/photo-1585237672814-8f85a8118bf6?w=100&h=100&fit=crop' },
+        { name: '小米', img: 'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '静音破壁机',
+      text: '「静音」在不同场景下标准差很多——<strong>租房党</strong>关注的是不扰民（60分贝以内），<strong>有娃家庭</strong>关注的是宝宝睡觉时也能用，<strong>早出晚归族</strong>关注的是预约功能+定时。<br><br><span class="key-point">重点</span> 蓝宝、摩飞是静音口碑款，你主要是早上用还是随时用？',
+      chips: ['60分贝内', '预约定时', '有娃家庭'],
+      brands: [
+        { name: '蓝宝', img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=100&h=100&fit=crop' },
+        { name: '摩飞', img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=100&h=100&fit=crop' },
+        { name: 'BRUNO', img: 'https://images.unsplash.com/photo-1585237672814-8f85a8118bf6?w=100&h=100&fit=crop' },
+        { name: '九阳', img: 'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=400&h=400&fit=crop', price: '399', original: '599', title: '九阳破壁机家用全自动多功能1.75L大容量', sold: '50万+人付款', shop: '九阳官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'销量TOP1',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=400&fit=crop', price: '299', original: '459', title: '苏泊尔破壁机静音款1.2L预约定时多功能', sold: '30万+人付款', shop: '苏泊尔官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'静音',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1585237672814-8f85a8118bf6?w=400&h=400&fit=crop', price: '199', original: '329', title: '美的破壁机一人食800ml小型迷你豆浆机', sold: '80万+人付款', shop: '美的官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'一人食',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=400&h=400&fit=crop', price: '499', original: '699', title: '米家智能破壁机N1 1.5L自动清洗预约', sold: '20万+人付款', shop: '小米官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'智能',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1570222094114-d054a817e56b?w=400&h=400&fit=crop', price: '699', original: '899', title: '九阳静音破壁机L18-P392 隔音罩设计', sold: '15万+人付款', shop: '九阳官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'静音款',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=400&fit=crop', price: '599', original: '799', title: '蓝宝轻音破壁机BP-PB02 52分贝超静音', sold: '12万+人付款', shop: '蓝宝官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'超静音',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1585237672814-8f85a8118bf6?w=400&h=400&fit=crop', price: '259', original: '399', title: '美的破壁机家用2L大容量八叶刀头', sold: '60万+人付款', shop: '美的官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'大容量',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=400&h=400&fit=crop', price: '359', original: '499', title: '米家破壁机S1 1.2L智能互联APP控制', sold: '25万+人付款', shop: '小米官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'智能互联',c:'orange'}] },
+    ],
+  },
+  decoration: {
+    name: '家装',
+    knowledge: {
+      keyword: '瓷砖',
+      text: '瓷砖核心看<strong>规格+材质+吸水率+防滑系数</strong>，客厅建议800×800通铺大气，厨卫600×600防滑更重要。马可波罗、东鹏、诺贝尔是站内热门。<br><br><span class="key-point">重点</span> 通体大理石纹理自然但价格高，抛光砖便宜但花色单一，预算有限选抛光砖性价比最高。',
+      chips: ['通体大理石', '抛光砖', '仿古砖'],
+      brands: [
+        { name: '马可波罗', img: 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=100&h=100&fit=crop' },
+        { name: '东鹏', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=100&h=100&fit=crop' },
+        { name: '诺贝尔', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&h=100&fit=crop' },
+        { name: '冠珠', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '防滑地砖',
+      text: '「防滑地砖」在不同场景下要求不同——<strong>有老人</strong>需要防滑系数0.6以上，<strong>有小孩</strong>需要摔伤不严重（哑光面更友好），<strong>厨房用</strong>需要耐油污好打理。<br><br><span class="key-point">重点</span> 你是厨房卫生间用还是全屋铺？不同区域防滑标准不一样。',
+      chips: ['有老人', '有小孩', '厨房卫生间'],
+      brands: [
+        { name: '简一', img: 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=100&h=100&fit=crop' },
+        { name: '金意陶', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=100&h=100&fit=crop' },
+        { name: '宏宇', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=100&h=100&fit=crop' },
+        { name: '东鹏', img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=400&h=400&fit=crop', price: '68', original: '98', title: '马可波罗瓷砖客厅地砖800×800通体大理石', sold: '10万+人付款', shop: '马可波罗官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'通体大理石',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop', price: '45', original: '68', title: '东鹏瓷砖防滑地砖600×600厨卫阳台', sold: '15万+人付款', shop: '东鹏瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'防滑',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=400&fit=crop', price: '89', original: '128', title: '诺贝尔瓷砖客厅地砖800×800大理石纹理', sold: '8万+人付款', shop: '诺贝尔瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'高端',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=400&fit=crop', price: '35', original: '55', title: '冠珠瓷砖抛光砖800×800客厅卧室', sold: '20万+人付款', shop: '冠珠瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'性价比',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?w=400&h=400&fit=crop', price: '58', original: '88', title: '马可波罗厨卫防滑砖600×600釉面砖', sold: '12万+人付款', shop: '马可波罗官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'厨卫专用',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400&h=400&fit=crop', price: '78', original: '118', title: '东鹏仿古砖600×600复古风阳台庭院', sold: '6万+人付款', shop: '东鹏瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'仿古',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=400&fit=crop', price: '128', original: '188', title: '诺贝尔微晶石瓷砖800×800客厅奢华', sold: '3万+人付款', shop: '诺贝尔瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'微晶石',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&h=400&fit=crop', price: '28', original: '45', title: '冠珠工程砖800×800出租房装修', sold: '30万+人付款', shop: '冠珠瓷砖旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'工程批发',c:'orange'}] },
+    ],
+  },
+  home: {
+    name: '家居',
+    knowledge: {
+      keyword: '床垫',
+      text: '床垫核心看<strong>材质+支撑性+透气性+厚度</strong>，单人1.5m够用，双人建议1.8m。喜临门、慕思、雅兰是站内热门。<br><br><span class="key-point">重点</span> 弹簧床垫支撑好但偏硬，乳胶床垫贴合身体但偏软，棕垫透气但支撑一般，乳胶+弹簧是舒适与支撑的平衡。',
+      chips: ['弹簧床垫', '乳胶床垫', '棕垫'],
+      brands: [
+        { name: '喜临门', img: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=100&h=100&fit=crop' },
+        { name: '慕思', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=100&h=100&fit=crop' },
+        { name: '雅兰', img: 'https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=100&h=100&fit=crop' },
+        { name: '大自然', img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '护腰床垫',
+      text: '「护腰」不是越硬越好——<strong>腰椎不好</strong>需要分区支撑（腰部加硬+其他部位适中），<strong>侧睡多</strong>需要肩部下沉腰部支撑，<strong>喜欢硬床</strong>建议棕垫+薄乳胶的组合。<br><br><span class="key-point">重点</span> 你是腰椎问题还是单纯喜欢硬床？不同需求配方不同。',
+      chips: ['腰椎问题', '侧睡多', '喜欢硬床'],
+      brands: [
+        { name: '穗宝', img: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=100&h=100&fit=crop' },
+        { name: '晚安', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=100&h=100&fit=crop' },
+        { name: '金可儿', img: 'https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=100&h=100&fit=crop' },
+        { name: '喜临门', img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=400&fit=crop', price: '1899', original: '2599', title: '喜临门床垫1.8m弹簧乳胶双面软硬两用', sold: '20万+人付款', shop: '喜临门官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'销量TOP1',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=400&fit=crop', price: '3999', original: '5599', title: '慕思床垫1.8m独立袋装弹簧护脊', sold: '8万+人付款', shop: '慕思官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'护脊',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=400&h=400&fit=crop', price: '2599', original: '3599', title: '雅兰床垫1.5m乳胶弹簧双人席梦思', sold: '12万+人付款', shop: '雅兰官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'乳胶',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&h=400&fit=crop', price: '1299', original: '1899', title: '大自然棕垫床垫1.8m天然山棕偏硬护腰', sold: '15万+人付款', shop: '大自然官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'护腰',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=400&fit=crop', price: '899', original: '1299', title: '喜临门床垫1.5m经济款弹簧床垫', sold: '35万+人付款', shop: '喜临门官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'性价比',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&h=400&fit=crop', price: '5999', original: '7999', title: '慕思床垫1.8mAI智能床垫分区调节', sold: '3万+人付款', shop: '慕思官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'智能',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1588046130717-0eb0c9a3ba15?w=400&h=400&fit=crop', price: '1599', original: '2199', title: '雅兰床垫1.8m泰国乳胶独立弹簧', sold: '18万+人付款', shop: '雅兰官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'泰国乳胶',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?w=400&h=400&fit=crop', price: '799', original: '1199', title: '大自然棕垫1.5m儿童护脊偏硬床垫', sold: '25万+人付款', shop: '大自然官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'儿童',c:'orange'}] },
+    ],
+  },
+  health: {
+    name: '医药健康',
+    knowledge: {
+      keyword: '维生素',
+      text: '维生素核心看<strong>种类+剂量+吸收率+成分纯度</strong>，日常保健选复合维生素，备孕选叶酸+维生素D，中老年选钙+维生素D。汤臣倍健、Swisse、善存是站内热门。<br><br><span class="key-point">重点</span> 脂溶性维生素(A/D/E/K)随餐服用吸收更好，水溶性维生素(C/B族)空腹也可以。',
+      chips: ['复合维生素', '单一维生素', '中老年配方'],
+      brands: [
+        { name: '汤臣倍健', img: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=100&h=100&fit=crop' },
+        { name: 'Swisse', img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=100&h=100&fit=crop' },
+        { name: '善存', img: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=100&h=100&fit=crop' },
+        { name: 'GNC', img: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=100&h=100&fit=crop' },
+      ],
+    },
+    attribute: {
+      keyword: '护肝维生素',
+      text: '「护肝」其实对应三个核心成分：<strong>水飞蓟提取物</strong>修复肝细胞、<strong>奶蓟草</strong>促进肝脏排毒、<strong>姜黄素</strong>抗炎保肝。应酬多/熬夜/肝功能异常的人群建议重点关注。<br><br><span class="key-point">重点</span> 你是经常应酬喝酒还是熬夜加班？不同场景侧重点不同。',
+      chips: ['应酬多', '熬夜', '肝功能异常'],
+      brands: [
+        { name: '康恩贝', img: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=100&h=100&fit=crop' },
+        { name: '澳佳宝', img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=100&h=100&fit=crop' },
+        { name: '自然之宝', img: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=100&h=100&fit=crop' },
+        { name: '汤臣倍健', img: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=100&h=100&fit=crop' },
+      ],
+    },
+    products: [
+      { img: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=400&fit=crop', price: '129', original: '169', title: '汤臣倍健多种维生素矿物质片120粒成人', sold: '50万+人付款', shop: '汤臣倍健官方旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'复合维生素',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop', price: '198', original: '268', title: 'Swisse男士复合维生素120片澳洲进口', sold: '30万+人付款', shop: 'Swisse海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'澳洲进口',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop', price: '89', original: '129', title: '善存多维元素片29种维生素矿物质', sold: '80万+人付款', shop: '善存官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'29种营养',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop', price: '158', original: '218', title: 'GNC健安喜女士复合维生素60粒美国进口', sold: '25万+人付款', shop: 'GNC海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'女士专用',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?w=400&h=400&fit=crop', price: '79', original: '119', title: '汤臣倍健维生素C咀嚼片100片增强免疫', sold: '100万+人付款', shop: '汤臣倍健官方旗舰店', tags: [{t:'国货补贴',c:'red'},{t:'维C',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop', price: '238', original: '328', title: 'Swisse护肝片120粒水飞蓟奶蓟草', sold: '20万+人付款', shop: 'Swisse海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'护肝',c:'green'}] },
+      { img: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop', price: '68', original: '98', title: '善存维生素D3钙片200粒中老年骨骼', sold: '60万+人付款', shop: '善存官方旗舰店', tags: [{t:'618抢先购',c:'red'},{t:'中老年',c:'orange'}] },
+      { img: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop', price: '189', original: '259', title: 'GNC辅酶Q10软胶囊60粒心脏保健', sold: '15万+人付款', shop: 'GNC海外旗舰店', tags: [{t:'百亿补贴',c:'red'},{t:'心脏保健',c:'green'}] },
+    ],
+  },
+};
+
+// ============ AI Content for each intent ============
+const aiContents = {
+  enter: null, // handled by knowledge/attribute
+  A: [
+    { text: '看你挑了好几件<strong>[品牌]</strong>，给你划重点——「[型号1]」[差异点1]，「[型号2]」[差异点2]。你平时[场景A]还是[场景B]？', options: ['🏔️ [选项A]', '🏃 [选项B]', '🔍 对比型号'] },
+    { text: '你看了好几款<strong>[品牌]</strong>，提醒一下——「[型号1]」更[特点1]适合[场景1]，「[型号2]」[特点2]适合[场景2]。你主要是[用途]还是[另一用途]？', options: ['选[型号1]', '选[型号2]', '再看看'] },
+  ],
+  B: [
+    { text: '你刚才看了<strong>[品牌1]</strong>、<strong>[品牌2]</strong>、<strong>[品牌3]</strong>三家，如果预算[X]以内，[品牌Y]性价比更高；如果追求[核心诉求]，[品牌Z]的[技术]更[优势]。你大概什么预算区间？', options: ['💰 [预算A]', '💰 [预算B]', '💰 [预算C]'] },
+  ],
+  C: [
+    { text: '如果你是想[场景目标]，[商品A]+[商品B]+[商品C]是黄金组合，预算[X]左右就能配齐。想先看攻略还是直接选单品？', options: ['📖 看攻略', '🛒 直接选', '💬 报预算'] },
+  ],
+  D: [
+    { text: '是不是还没看到合适的？换个思路——你是更看重<strong>[维度A]</strong>、还是<strong>[维度B]</strong>？或者报个预算，我帮你重新筛一波。', options: ['😎 [维度A]', ' [维度B]', '💰 报预算'] },
+  ],
+  E: [
+    { text: '这件配<strong>[搭配商品]</strong>会更完整，[使用价值]。要一起看下[搭配品类]推荐吗？', options: ['👉 [搭配品类]', ' 看耗材', '📦 整套带走'] },
+  ],
+  F: [
+    { text: '看你一直在看<strong>[规格类型]</strong>，[品牌][型号]这款[版型特点]，[条件A]建议选[规格A]，[条件B]就选[规格B]。不确定的话报一下[关键数据]，我帮你确认。', options: ['📏 报数据', '👀 看尺码表', '🔙 继续挑'] },
+  ],
+  G: [
+    { text: '这款累计<strong>[X]条评价</strong>，我帮你提炼了一下——「[正面词]」被提到[X]次，「[负面词]」被提到[X]次。[用户群体]建议[购买建议]，想看真实晒单我可以帮你筛出来。', options: ['📸 看晒单', '⚠️ 看差评', '✅ 已了解'] },
+  ],
+  H: [
+    { text: '你看了<strong>[X]</strong>和<strong>[Y]</strong>两个价位，说实话中间差的不只是品牌——[低价位]的[参数A]适合[场景A]，[高价位]的[参数B]能[场景B]。如果平时只是[日常场景]，[中价位]完全够用。', options: ['💰 选平替', '👑 选高配', '🔍 再看差价'] },
+  ],
+  I: [
+    { text: '你购物车已经<strong>[X]元</strong>了，再凑<strong>[Y]元</strong>就能减[Z]。推荐这[商品]，[实用理由]，凑完单相当于白送。要一起加购吗？', options: ['🛒 一键加购', '📝 自己挑', '❌ 不需要'] },
+  ],
+  J: [
+    { text: '看你之前买过<strong>[旧款]</strong>，[新款]主要升级了[升级点1]和[升级点2]。如果你旧款还没[使用阈值]，其实没必要急着换；如果[需要换新的条件]，[新款]值得入。', options: ['🆕 看新款', ' 买配件', '📉 以旧换新'] },
+  ],
+};
+
+// ============ STATE ============
+let industry = 'sports';
+let kwType = 'knowledge';
+let intent = 'enter';
+
+// ============ RENDER ============
+function render() {
+  const data = industries[industry];
+  const aiData = kwType === 'knowledge' ? data.knowledge : data.attribute;
+  const container = document.getElementById('page-content');
+
+  let html = '';
+
+  // Header AI Guide (only for enter intent)
+  if (intent === 'enter') {
+    html += renderHeaderAI(aiData);
+  }
+
+  // Filter Tabs
+  html += renderFilterTabs();
+
+  // Promo Banner
+  html += renderPromoBanner();
+
+  // Product Grid
+  html += '<div class="product-grid">';
+  const prods = data.products;
+
+  // First 2 products
+  html += renderProduct(prods[0], 0);
+  html += renderProduct(prods[1], 1);
+
+  // Inline AI for non-enter intents
+  if (intent !== 'enter') {
+    html += renderInlineAI(intent, aiData);
+  }
+
+  // Next products
+  for (let i = 2; i < Math.min(prods.length, 8); i++) {
+    html += renderProduct(prods[i], i);
+
+    // Insert second AI bubble for A/B intents after 4th product
+    if (i === 3 && (intent === 'A' || intent === 'B')) {
+      html += renderInlineAI(intent === 'A' ? 'A2' : 'B2', aiData);
+    }
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
+
+  // Update search text
+  document.getElementById('search-text').textContent = aiData.keyword;
+
+  // Scroll to top
+  document.getElementById('scroll-area').scrollTop = 0;
+}
+
+function renderHeaderAI(aiData) {
+  const brandPills = aiData.brands.map(b => `
+    <div class="brand-pill">
+      <img src="${b.img}" class="brand-pill-img" alt="">
+      <span class="brand-pill-name">${b.name}</span>
+    </div>
+  `).join('');
+
+  const chipsHtml = aiData.chips.map((c, i) =>
+    `<span class="ai-chip ${i === 0 ? 'active' : ''}">${c}</span>`
+  ).join('');
+
+  return `
+    <div class="ai-header anim-in">
+      <div class="ai-header-top">
+        <div class="ai-avatar-small">🐱</div>
+        <div class="ai-title-text">
+          天猫AI导购员
+          <span class="ai-badge">AI</span>
+        </div>
+      </div>
+      <div class="ai-content-text">${aiData.text}</div>
+      <div class="brand-pills">${brandPills}</div>
+      <div class="ai-action-bar">
+        <div class="ai-action-left">${chipsHtml}</div>
+        <div class="ai-go-btn">去看看 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+    </div>
+  `;
+}
+
+function renderFilterTabs() {
+  const tabs = ['综合', '销量', '价格', '店铺', '筛选'];
+  const tabsHtml = tabs.map((t, i) =>
+    `<span class="filter-tab ${i === 0 ? 'active' : ''}">${t}</span>`
+  ).join('');
+
+  return `
+    <div class="filter-tabs">
+      ${tabsHtml}
+      <span class="filter-tab ai-tab"> AI搜一下</span>
+    </div>
+  `;
+}
+
+function renderPromoBanner() {
+  return `
+    <div class="promo-banner anim-in">
+      <div class="promo-left">
+        <span class="promo-tag">618抢先购</span>
+        <span class="promo-text">8.5折起 · 官方立减</span>
+      </div>
+      <span class="promo-time">消费券 00:11:13后失效</span>
+    </div>
+  `;
+}
+
+function renderProduct(p, idx) {
+  const tagsHtml = p.tags.map(t => `<span class="ptag ptag-${t.c}">${t.t}</span>`).join('');
+  return `
+    <div class="product-card anim-in" style="animation-delay:${idx*0.04}s">
+      <div class="product-img-wrap">
+        <img src="${p.img}" class="product-img" alt="">
+        <span class="product-tag-618">618抢先购</span>
+      </div>
+      <div class="product-info">
+        <div class="price-row">
+          <span class="price-symbol">¥</span>
+          <span class="price-num">${p.price}</span>
+          <span class="price-original">¥${p.original}</span>
+        </div>
+        <p class="product-title">${p.title}</p>
+        <div class="product-meta">
+          <span class="product-sold">${p.sold}</span>
+          <span class="product-shop">${p.shop}</span>
+        </div>
+        <div class="product-tags-row">${tagsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderInlineAI(intentType, aiData) {
+  const content = getIntentContent(intentType, aiData);
+  const labelHtml = content.label ? `<span class="intent-label ${content.label}">${content.labelText}</span>` : '';
+  const optsHtml = content.options.map(opt =>
+    `<button class="ai-inline-btn" onclick="this.classList.toggle('selected')">${opt}</button>`
+  ).join('');
+
+  return `
+    <div class="ai-inline anim-in">
+      <div class="ai-inline-avatar">🐱</div>
+      <div class="ai-inline-body">
+        ${labelHtml}
+        <p class="ai-inline-text">${content.text}</p>
+        <div class="ai-inline-options">${optsHtml}</div>
+      </div>
+    </div>
+  `;
+}
+
+function getIntentContent(intentType, aiData) {
+  const kw = aiData.keyword;
+  const brand = aiData.brands[0].name;
+  const brand2 = aiData.brands[1].name;
+  const brand3 = aiData.brands[2].name;
+
+  const templates = {
+    sports: {
+      A: { text: `看你挑了好几件<strong>${brand}</strong>，给你划重点——「1986复刻」版型偏大适合叠穿，「1994 Mountain」轻量但防风弱一些。你平时通勤还是户外？`, options: ['🏔️ 户外徒步', '🏃 日常通勤', '🔍 对比型号'], label: 'intent-a', labelText: '意图A · 单品牌深度挑选' },
+      B: { text: `你刚才看了<strong>${brand}</strong>、<strong>${brand2}</strong>、<strong>${brand3}</strong>三家，如果预算2k以内，${brand3}性价比更高；如果追求极端环境防护，${brand}的Gore-Tex Pro更硬核。你大概什么预算区间？`, options: ['💰 1k以内', ' 1-2k', '💰 2k以上'], label: 'intent-b', labelText: '意图B · 跨品牌横向对比' },
+      C: { text: '如果你是想搭一套<strong>春秋徒步装备</strong>，冲锋衣+速干打底+软壳裤是黄金三件套，预算1.5k左右就能配齐。想先看攻略还是直接选单品？', options: ['📖 看攻略', '🛒 直接选', '💬 报预算'], label: 'intent-c', labelText: '意图C · 场景需求未明确' },
+      D: { text: '是不是还没看到合适的？换个思路——你是更看重<strong>颜值出片</strong>、还是<strong>功能性拉满</strong>？或者报个预算，我帮你重新筛一波。', options: ['😎 颜值优先', '⚡ 功能优先', ' 报预算'], label: 'intent-d', labelText: '意图D · 找不到/流失风险' },
+      E: { text: '这件配<strong>速干软壳裤</strong>会更完整，徒步出汗不粘腿。要一起看下裤装推荐吗？', options: ['👖 看裤装', '🧦 看袜子', ' 看登山包'], label: 'intent-e', labelText: '意图E · 已选好/连带扩散' },
+      F: { text: `看你一直在看尺码，${brand}1986这款版型偏宽松，身高175/70kg建议选M，里面要叠穿抓绒就选L。不确定的话报一下身高体重，我帮你确认。`, options: ['📏 报数据', ' 看尺码表', '🔙 继续挑'], label: 'intent-f', labelText: '意图F · 规格/尺码纠结' },
+      G: { text: '这款累计<strong>2.3万条评价</strong>，我帮你提炼了一下——「防风好」被提到1862次，「尺码偏大」被提到743次。微胖身材建议选小一码，想看真实上脚图我可以帮你筛出来。', options: ['📸 看晒单', '⚠️ 看差评', '✅ 已了解'], label: 'intent-g', labelText: '意图G · 评价驱动决策' },
+      H: { text: '你看了<strong>399</strong>和<strong>2899</strong>两个价位，说实话中间差的不只是品牌——399的防水指数3000mm适合小雨，2899的20000mm能抗暴雨。如果平时只是城市通勤，899的凯乐石完全够用。', options: ['💰 选平替', '👑 选高配', '🔍 再看差价'], label: 'intent-h', labelText: '意图H · 价格敏感犹豫' },
+      I: { text: '你购物车已经<strong>498元</strong>了，再凑<strong>102元</strong>就能减50。推荐这双29元的运动袜，实用不浪费，凑完单袜子相当于白送。要一起加购吗？', options: ['🛒 一键加购', ' 自己挑', '❌ 不需要'], label: 'intent-i', labelText: '意图I · 凑单/满减驱动' },
+      J: { text: `看你之前买过<strong>${brand}1986</strong>，2025新款主要升级了<strong>面料透气性</strong>和<strong>腋下拉链散热</strong>。如果你旧款还没穿够2年，其实没必要急着换；如果面料已经磨白了，新款值得入。`, options: ['🆕 看新款', ' 买配件', '📉 以旧换新'], label: 'intent-j', labelText: '意图J · 升级/复购偏好' },
+    },
+    beauty: {
+      A: { text: `看你挑了好几件<strong>${brand}</strong>，给你划重点——「小金瓶」成膜快适合补涂，「新艳阳夏」轻薄适合打底。你主要是日常通勤还是海边度假？`, options: ['☀️ 日常通勤', '🏖️ 海边度假', '🔍 对比型号'], label: 'intent-a', labelText: '意图A · 单品牌深度挑选' },
+      B: { text: `你刚才看了<strong>${brand}</strong>、<strong>${brand2}</strong>、<strong>${brand3}</strong>三家，如果预算200以内，${brand3}性价比更高；如果追求成膜速度，${brand}的小金瓶技术更成熟。你大概什么预算区间？`, options: ['💰 100以内', '💰 100-300', '💰 300以上'], label: 'intent-b', labelText: '意图B · 跨品牌横向对比' },
+      C: { text: '如果你是想<strong>日常防晒不出错</strong>，防晒+晒后修复+补涂喷雾是黄金三件套，预算300左右就能配齐。想先看攻略还是直接选单品？', options: ['📖 看攻略', '🛒 直接选', '💬 报预算'], label: 'intent-c', labelText: '意图C · 场景需求未明确' },
+      D: { text: '是不是还没看到合适的？换个思路——你是更看重<strong>防晒力</strong>、还是<strong>肤感清爽</strong>？或者报个预算，我帮你重新筛一波。', options: ['😎 防晒力优先', '⚡ 肤感优先', '💰 报预算'], label: 'intent-d', labelText: '意图D · 找不到/流失风险' },
+      E: { text: '这件配<strong>晒后修复芦荟胶</strong>会更完整，晒后镇定不泛红。要一起看下修复类推荐吗？', options: [' 看晒后修复', ' 看补水喷雾', '🧼 看卸妆'], label: 'intent-e', labelText: '意图E · 已选好/连带扩散' },
+      F: { text: `看你一直在看容量，${brand}小金瓶30ml适合面部+补涂，90ml适合全身涂抹。如果你主要涂脸，30ml够用2个月；如果要涂身体，建议直接上90ml更划算。`, options: ['📏 面部用', ' 身体用', '🔙 继续挑'], label: 'intent-f', labelText: '意图F · 规格/尺码纠结' },
+      G: { text: '这款累计<strong>50万条评价</strong>，我帮你提炼了一下——「不搓泥」被提到8620次，「泛白」被提到1243次。油皮用户反馈成膜后很清爽，想看真实肤感评价我可以帮你筛出来。', options: ['📸 看晒单', '⚠️ 看差评', '✅ 已了解'], label: 'intent-g', labelText: '意图G · 评价驱动决策' },
+      H: { text: '你看了<strong>89</strong>和<strong>268</strong>两个价位，说实话中间差的不只是品牌——89的SPF30日常够用，268的SPF50+适合长时间户外。如果平时只是通勤，139的欧莱雅完全够用。', options: ['💰 选平替', ' 选高配', '🔍 再看差价'], label: 'intent-h', labelText: '意图H · 价格敏感犹豫' },
+      I: { text: '你购物车已经<strong>268元</strong>了，再凑<strong>32元</strong>就能减50。推荐这盒35元的吸油纸，夏天必备不浪费，凑完单相当于白送。要一起加购吗？', options: ['🛒 一键加购', '📝 自己挑', '❌ 不需要'], label: 'intent-i', labelText: '意图I · 凑单/满减驱动' },
+      J: { text: `看你之前买过<strong>${brand}小金瓶2024款</strong>，2025新款主要升级了<strong>成膜速度</strong>和<strong>抗汗配方</strong>。如果你旧款还没过期，其实没必要急着换；如果夏天快到了需要补货，新款值得入。`, options: [' 看新款', '🔧 买同款', '📉 等大促'], label: 'intent-j', labelText: '意图J · 升级/复购偏好' },
+    },
+  };
+
+  // Use sports templates as default for other industries
+  const industryTemplates = templates[industry] || templates.sports;
+  return industryTemplates[intentType] || industryTemplates.A;
+}
+
+// ============ CONTROLS ============
+function setIndustry(newIndustry) {
+  industry = newIndustry;
+  intent = 'enter';
+  updateControls();
+  render();
+}
+
+function setKWType(newType) {
+  kwType = newType;
+  updateControls();
+  render();
+}
+
+function setIntent(newIntent) {
+  intent = newIntent;
+  updateControls();
+  render();
+}
+
+function updateControls() {
+  // Industry buttons
+  document.querySelectorAll('#industry-btns .cp-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  // KW type buttons
+  document.querySelectorAll('#kw-type-btns .cp-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('cp-kw-' + kwType).classList.add('active');
+
+  // Intent buttons
+  document.querySelectorAll('.cp-intent-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById('cp-int-' + intent).classList.add('active');
+}
+
+// ============ INIT ============
+render();
+</script>
+
+</body>
+</html>
